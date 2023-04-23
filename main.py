@@ -102,8 +102,11 @@ def check_bin(path):
             clang_version_string = ''.join(c for c in clang_version_string if c.isdigit() or c == '.')
             clang_version = int(clang_version_string.split('.')[0])
             break
-    if clang_version is None or clang_version < 14:
-        raise ValueError(f'File {path} was not built with clang version 14 or higher. {force_mention}')
+    if clang_version < 14:
+        raise ValueError(f'File {path} was built with clang version {clang_version}. {force_mention}')
+    if clang_version is None:
+        raise ValueError(f'Couldn\'t determine clang version. '
+                         f'File {path} probably was not built with clang version 14 or higher. {force_mention}')
 
 
 def check_path(path):
