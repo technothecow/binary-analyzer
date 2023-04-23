@@ -1,9 +1,13 @@
-asan:
-  - '__asan_'
-  - '___asan_'
-tsan:
-  - '__tsan_'
-  - '___tsan_'
-msan:
-  - '__msan_'
-  - '___msan_'
+mime-types:
+- application/x-executable
+- application/x-sharedlib
+sanitizer_prefixes:
+  asan:
+  - __asan_
+  - ___asan_
+  msan:
+  - __msan_
+  - ___msan_
+  tsan:
+  - __tsan_
+  - ___tsan_

@@ -25,6 +25,7 @@ class Config:
         self.config_path = path
 
         if reset:
+            print(f'Resetting config at {path} as asked...')
             self.fix_config()
             return
 
@@ -56,7 +57,7 @@ class Config:
                 'msan': ['__msan_', '___msan_']
             },
             'mime-types': [
-                'application/x-executable'
+                'application/x-executable',
                 'application/x-sharedlib'
             ]
         }
@@ -68,8 +69,8 @@ class Config:
 
 
 def fix_path(path):
-    path = os.path.abspath(path)
     path = os.path.expanduser(path)
+    path = os.path.abspath(path)
     return path
 
 
@@ -78,9 +79,10 @@ def check_bin(path):
 
     # Mime type check
     mime_type = magic.from_file(path, mime=True)
-    print(f'[DEBUG] File\'s mime type: {mime_type}')
+    # print(f'[DEBUG] File\'s mime type: {mime_type}')
     if not any(mime_type.startswith(t) for t in config.mime_types):
-        return False
+        raise ValueError(f'File {path} have unacceptable mime type. '
+                         f'Change config file or use \'--force\' if you know what you are doing.')
 
     # ELF binary or shared library check
     file_output = subprocess.check_output(['file', '-b', path])
@@ -95,27 +97,21 @@ def check_bin(path):
     objdump_output_lines = objdump_output.decode('utf-8').splitlines()
     clang_version = None
     for line in objdump_output_lines:
-        if 'clang' in line:
+        if 'clang version' in line:
             clang_version_string = line.strip().split('clang version ')[-1]
+            clang_version_string = ''.join(c for c in clang_version_string if c.isdigit() or c == '.')
             clang_version = int(clang_version_string.split('.')[0])
             break
     if clang_version is None or clang_version < 14:
         raise ValueError(f'File {path} was not built with clang version 14 or higher. {force_mention}')
 
-    return True
-
 
 def check_path(path):
     if not os.path.isfile(path):
-        raise ValueError(f'File {path} does not exist')
+        raise ValueError(f'File {path} does not exist or not a file')
 
     if not os.access(path, os.X_OK):
         raise ValueError(f'File {path} is not an executable')
-
-    if not check_bin(path):
-        raise ValueError(
-            f'File {path} haven\'t passed check for binary file. '
-            f'If you think it\'s a bug, use \'--force\' flag and submit a report')
 
 
 def get_sanitizer_type(path):
@@ -129,7 +125,7 @@ def get_sanitizer_type(path):
         elif any(pref in line for pref in config.SanitizerPrefixes.msan):
             res.add('MemorySanitizer')
 
-    return res if len(res) > 0 else 'No sanitizer found'
+    return res
 
 
 def parse_args():
@@ -157,3 +153,15 @@ if __name__ == '__main__':
     # file_path = '~/CLionProjects/algo/cmake-build-asan/main'
     file_path = args.file_path
     file_path = fix_path(file_path)
+
+    check_path(file_path)
+    if not args.force:
+        check_bin(file_path)
+
+    res = get_sanitizer_type(file_path)
+    if len(res) == 0:
+        print(f'No sanitizers found in {file_path}')
+    else:
+        print(f'{len(res)} {"sanitizers" if len(res) > 1 else "sanitizer"} found in {file_path}:')
+        for san in res:
+            print(' -', san)
