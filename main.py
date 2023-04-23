@@ -91,7 +91,7 @@ def check_bin(path):
 
     # clang (version 14+) check
     try:
-        objdump_output = subprocess.check_output(['objdump', '-s', '-j', '.comment', path])
+        objdump_output = subprocess.check_output(['readelf', '-p', '.comment', path])
     except subprocess.CalledProcessError:
         raise ValueError(f'Could not read version information from file {path}. {force_mention}')
     objdump_output_lines = objdump_output.decode('utf-8').splitlines()
