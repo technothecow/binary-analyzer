@@ -1,0 +1,9 @@
+asan:
+  - '__asan_'
+  - '___asan_'
+tsan:
+  - '__tsan_'
+  - '___tsan_'
+#msan:
+#  - '__msan_'
+#  - '___msan_'
