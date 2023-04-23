@@ -4,6 +4,6 @@ asan:
 tsan:
   - '__tsan_'
   - '___tsan_'
-#msan:
-#  - '__msan_'
-#  - '___msan_'
+msan:
+  - '__msan_'
+  - '___msan_'
