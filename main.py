@@ -79,7 +79,6 @@ def check_bin(path):
 
     # Mime type check
     mime_type = magic.from_file(path, mime=True)
-    # print(f'[DEBUG] File\'s mime type: {mime_type}')
     if not any(mime_type.startswith(t) for t in config.mime_types):
         raise ValueError(f'File {path} have unacceptable mime type. '
                          f'Change config file or use \'--force\' if you know what you are doing.')
@@ -153,7 +152,6 @@ if __name__ == '__main__':
 
     config = Config(args.config, args.reset)
 
-    # file_path = '~/CLionProjects/algo/cmake-build-asan/main'
     file_path = args.file_path
     file_path = fix_path(file_path)
 
