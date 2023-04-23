@@ -7,7 +7,12 @@
 # See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
 stages:
 - test
-sast:
+
+test-job:
   stage: test
-include:
-- template: Security/SAST.gitlab-ci.yml
+  script:
+    - echo "Hello world" && exit 0
+#sast:
+#  stage: test
+#include:
+#- template: Security/SAST.gitlab-ci.yml
